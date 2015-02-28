@@ -106,9 +106,7 @@ class DropboxAccount:
     def verify_account(self):
         # send verification email
         r = self.opener.open("https://www.dropbox.com/developers/apps/create")
-        response = r.read()
-        open("hello.html", "w").write(response)
-        soup = bs4.BeautifulSoup(response)
+        soup = bs4.BeautifulSoup(r.read())
         inputs = soup.find_all("form")[0].find_all("input")
         t = str(inputs[0]['value'])
         uid = int(inputs[1]['value'])
