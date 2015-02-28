@@ -4,9 +4,9 @@ import re
 import urllib
 import urllib2
 
-def send_verification_email(cj, email, t, uid):
+def send_verification_email(opener, email, t, uid):
     data = {}
-    data['is_xhr'] = True
+    data['is_xhr'] = "true"
     data['t'] = t
     data['email'] = email
     data['reason'] = "create_api_app"
@@ -19,18 +19,23 @@ def send_verification_email(cj, email, t, uid):
     url = "https://www.dropbox.com/sendverifyemail"
     req = urllib2.Request(url, urllib.urlencode(data), headers)
 
-    opener = urllib.build_opener(urllib2.HTTPCookieProcessor(cj))
-    r = opener.open(url, urllib.urlencode(data), headers)
+    # opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+    r = opener.open(req)
     response = r.read()
     if response != "ok":
         print(response)
 
-def get_verification_url():
+def get_verification_url(email):
     mail = imaplib.IMAP4_SSL('imap.gmail.com')
     mail.login('uiuclotsbox@gmail.com', 'Bagels12')
     mail.select('inbox')
-    result, data = mail.search(
-        None, '(HEADER Subject "verify") (FROM "no-reply@dropbox.com")')
+
+    query = ""
+    query += '(HEADER Subject "verify")'
+    query += ' (HEADER To "%s")' % email
+    query += ' (FROM "no-reply@dropbox.com")'
+    result, data = mail.search(None, query)
+
     if result == 'OK':
         response = data[0].split()
         if len(response) > 0:
@@ -39,9 +44,9 @@ def get_verification_url():
 
             i = body.find('href=3D"')
             i2 = body.find('">', i)
-            return body[i+7:i2+1].replace("=\r\n", "")
+            return body[i+8:i2].replace("=\r\n", "")
 
         else:
-            raise Exception("No results found")
+            return None
     else:
         raise Exception("Could not connect")
