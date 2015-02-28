@@ -35,4 +35,8 @@ def find_file(db, uid, path):
 	
 def get_box(db, uid, fType, size):
 	query = {"uid" : uid, "fTypes" : fType, "space" : {"$gt": size}}
-	return db.boxes.find_one(query)
+	box_record = db.boxes.find_one(query)
+	ey = box_record["key"]
+	secret = box_record["secret"]
+	token = box_record["token"]
+	return key, secret, token

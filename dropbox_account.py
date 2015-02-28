@@ -30,7 +30,7 @@ def monkeypatch_mechanize():
         SubmitControl.__init__ = __init__
 
 class DropboxAccount:
-    def __init__(self, email, password, fname, lname):
+    def __init__(self, email, password, fname, lname, self.fileTypes = [0, 1, 2]):
         self.email = email
         self.password = password
         self.fname = fname
@@ -138,14 +138,14 @@ class DropboxAccount:
         self.br.open(url)
         print("verified!")
 
-    def create_app(self, appname, fileTypes=[0, 1, 2]):
+    def create_app(self, appname):
         self.br.open("https://www.dropbox.com/developers/apps/create")
         self.br.select_form(nr=0)
         self.br.form.set_value(["api"], name="app_type")
         self.br.form.set_value(["files"], name="data_type")
         self.br.form.set_value(["specific"], name="file_access")
         self.br.form.set_value(appname, name="name")
-        for type in fileTypes:
+        for type in self.fileTypes:
             self.br.form.find_control("file_types").items[type].selected=True
         self.br.form.find_control("tos_accept").items[0].selected=True
         self.br.submit()
