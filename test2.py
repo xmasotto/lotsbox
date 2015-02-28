@@ -5,14 +5,11 @@ import cookielib
 import bs4
 import time
 
-email = "....................uiuclotsbox@gmail.com"
+email = ".uiuclots.box@gmail.com"
 
 br = set_up_browser()
 create_dropbox(br, "test", "test2", email, "Bagels12")
 cj = get_cookie_jar(br)
-
-# cj = cookielib.LWPCookieJar()
-# cj.load('cookie_file')
 
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 r = opener.open("https://www.dropbox.com/developers/apps/create")
@@ -40,3 +37,24 @@ print("verified")
 
 app_key, app_secret = create_app(br, email + "nohomo")
 print(app_key, app_secret)
+
+soup = bs4.BeautifulSoup(br.response().read())
+app_id = soup.find_all("input", type="hidden")[2]['value']
+t = soup.find_all("input", type="hidden")[1]['value']
+
+data = {}
+data['is_xhr'] = "true"
+data['app_id'] = app_id
+data['t'] = t
+
+headers = {}
+# headers['origin'] = "https://www.dropbox.com"
+# headers['referer'] = "https://www.dropbox.com/developers/apps/create"
+
+url = "https://www.dropbox.com/developers/apps/generate_access_token"
+req = urllib2.Request(url, urllib.urlencode(data), headers)
+
+r = opener.open(req)
+response = r.read()
+if response != "ok":
+    print(response)
