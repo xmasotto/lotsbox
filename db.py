@@ -4,14 +4,14 @@ class LotsBoxDB:
     def __init__(self, host):
         self.db = MongoClient(host, 27017).LotsBox
 
-    def add_box(self, uid, key, token, space):
+    def add_box(self, uid, email, key, token, space):
         box_record = {}
         box_record["uid"] = uid
         box_record["key"] = key
         box_record["token"] = token
         box_record["space"] = space
+        box_record["email"] = email
         self.db.boxes.insert(box_record)
-
 
     def add_space(self, key, space):
         box = self.db.boxes.find_one({"key" : key})

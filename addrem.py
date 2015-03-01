@@ -20,7 +20,11 @@ def add_file(uid, input_file, path, size, mod_time):
     if box == None:
         account = generateAccount()
         box = account.app_key, account.app_token
-        mydb.add_box(uid, account.app_key, account.app_token, start_space)
+        mydb.add_box(uid,
+                     account.email,
+                     account.app_key,
+                     account.app_token,
+                     start_space)
     fid = generate_fid(uid)
 
     client = dropbox.client.DropboxClient(box[1])

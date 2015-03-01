@@ -32,7 +32,7 @@ def monkeypatch_mechanize():
         SubmitControl.__init__ = __init__
 
 #DEAL WITH VERIFICATION
-def generateAccount(k=254):
+def generateAccount(k=127):
     base_email = "uiuclotsbox@gmail.com"
     try:
         email = base_email

@@ -38,9 +38,10 @@ def get_stats(uid):
     print(box)
     remaining += box['space']
     total += start_space
+  used = total - remaining
   if total == 0:
       total = 100 * 1024 * 1024
-  return round(remaining / 1024 / 1024), round(total / 1024 / 1024)
+  return round(used / 1024 / 1024), round(total / 1024 / 1024)
 
 def get_link(uid, path, name):
   return "/%s?uid=%s" % (path + name, uid)
@@ -67,6 +68,21 @@ def analytics():
     return render_template("analytics.html",
                            uid=uid,
                            num_files=len(file_list),
+                           stats=get_stats(uid))
+
+@app.route('/accounts')
+def accounts():
+  uid = request.args.get('uid')
+  if uid == None:
+    return sign_in()
+  else:
+    file_list = mydb.list_files(uid)
+    boxes = [(box['email'], round(box['space'] / 1024 / 1024, 1))
+             for box in mydb.db.boxes.find({"uid": uid})]
+    return render_template("accounts.html",
+                           uid=uid,
+                           num_files=len(file_list),
+                           boxes=boxes,
                            stats=get_stats(uid))
 
 def show_file(uid, path):
