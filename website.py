@@ -30,15 +30,15 @@ def get_icon(name):
       return "http://icons.iconarchive.com/icons/danrabbit/elementary/32/Document-empty-icon.png"
 
 def get_link(uid, path, name):
-  return "/?uid=%s&p=%s" % (uid, path + name)
+  return "/%s?uid=%s" % (path + name, uid)
 
 @app.route('/')
-def main(path=None):
+@app.route('/<path:path>')
+def main(path=""):
   uid = request.args.get('uid')
   if uid == None:
     return sign_in()
   else:
-    path = request.args.get('p') or ""
     if path == "" or path[-1] == '/':
       return show_folder(uid, path)
     else:
