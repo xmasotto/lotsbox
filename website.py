@@ -1,7 +1,30 @@
 from flask import Flask, render_template, request
 from db import *
 
+import urllib2
+import sys
+
 app = Flask(__name__)
+
+icons = {}
+def get_icon(name):
+  p = name.rfind(".")
+  if name[-1] == "/":
+    return "http://icons.iconarchive.com/icons/danrabbit/elementary/32/Folder-icon.png"
+  ext = name[p+1:]
+  if ext in icons:
+    return icons[ext]
+  url = "http://icons.iconarchive.com/icons/fatcow/farm-fresh/32/file-extension-"+ext+"-icon.png"
+  try:
+    urllib2.urlopen(url)
+    icons[ext] = url
+    return url
+  except Exception:
+    print "Unexpected error:", sys.exc_info()
+    if ext in ['xml', 'py', 'cpp', 'c', 'php', 'js', 'html']:
+      return "http://icons.iconarchive.com/icons/danrabbit/elementary/32/Document-xml-icon.png"
+    else:
+      return "http://icons.iconarchive.com/icons/danrabbit/elementary/32/Document-empty-icon.png"
 
 @app.route('/')
 def main(path=None):
@@ -39,7 +62,8 @@ def show_folder(uid, path):
     else:
       files[filename] = mod_date
 
-  return render_template('main.html', messages=list(files.items()))
+  data = [(get_icon(name), name, mod_time) for name, mod_time in files.items()]
+  return render_template('main.html', messages=data)
 
 def sign_in():
   return render_template('sign_in.html')

@@ -84,6 +84,7 @@
             <table class="table">
               <thead>
                 <tr>
+                  <th></th>
                   <th>Name</th>
                   <th>Kind</th>
                   <th>Modified</th>
@@ -97,9 +98,10 @@
                 </tr>
                 {% for message in messages %}
                   <tr>
-                    <td>{{ message[0] }}</td>
+                    <td><img src={{ message[0] }}></td>
                     <td> TBD </td>
                     <td>{{ message[1] }}</td>
+                    <td>{{ message[2] }}</td>
                   </tr>                  
                 {% endfor %}
               </tbody>
