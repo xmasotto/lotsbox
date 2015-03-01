@@ -56,21 +56,22 @@
       <div class="row">
         <div id="divSidebar" class="col-sm-2 col-md-1 col-md-offset-2">
           <div class="sidebar-module">
+			Welcome, <b>{{ uid }}</b>
+			<hr>
+		  </div>
+          <span class="sidebar-module">
             <ol class="list-unstyled">
-              <li><a href="#">Files</a></li>
-              <li><a href="#">Photos</a></li>
-              <li><a href="#">Sharing</a></li>
-              <li><a href="#">Links</a></li>
-              <li><a href="#">Events</a></li>
+              <li><a href="/?uid={{uid}}">Files</a></li>
+              <li><a href="/analytics?uid={{uid}}">Analytics</a></li>
             </ol>
-          </div>
-          <div class="sidebar-module">
-            <h4>Also from Lotsbox</h4>
-            <ol class="list-unstyled">
-              <li><a href="#">Lol</a></li>
-              <li><a href="#">Also Lol</a></li>
-            </ol>
-          </div>
+			<hr>
+</span>
+
+<span class="sidebar-module">
+	  {{ num_files }} Files<br>
+	  {{ stats[0] }}MB /
+	  {{ stats[1] }}MB
+          </span>
         </div><!-- /.blog-sidebar -->
 
         <div class="col-sm-10 col-md-7 main">

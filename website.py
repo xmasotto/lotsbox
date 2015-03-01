@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, Response
 from db import *
+from addrem import *
 
 import urllib2
 import sys
@@ -29,6 +30,18 @@ def get_icon(name):
     else:
       return "http://icons.iconarchive.com/icons/danrabbit/elementary/32/Document-empty-icon.png"
 
+def get_stats(uid):
+  remaining = 0
+  total = 0
+  boxes = mydb.db.boxes.find({"uid": uid})
+  for box in boxes:
+    print(box)
+    remaining += box['space']
+    total += start_space
+  if total == 0:
+      total = 100 * 1024 * 1024
+  return round(remaining / 1024 / 1024), round(total / 1024 / 1024)
+
 def get_link(uid, path, name):
   return "/%s?uid=%s" % (path + name, uid)
 
@@ -46,7 +59,15 @@ def main(path=""):
 
 @app.route('/analytics')
 def analytics():
-  return render_template("analytics.html")  
+  uid = request.args.get('uid')
+  if uid == None:
+    return sign_in()
+  else:
+    file_list = mydb.list_files(uid)
+    return render_template("analytics.html",
+                           uid=uid,
+                           num_files=len(file_list),
+                           stats=get_stats(uid))
 
 def show_file(uid, path):
   fid, mod_time, token = mydb.find_file(uid, path)
@@ -75,12 +96,12 @@ def show_folder(uid, path):
   file_list = mydb.list_files(uid)
   local_file_list = []
 
-  file_list = [(name[len(path):], mod_time)
+  file_list2 = [(name[len(path):], mod_time)
                for name, mod_time in file_list
                if name.startswith(path)]
 
   files = {}
-  for filename, mod_date in file_list:
+  for filename, mod_date in file_list2:
     if '/' in filename:
       filename = filename[:filename.index('/')+1]
       if filename in files:
@@ -93,7 +114,11 @@ def show_folder(uid, path):
   data = [(get_icon(name), name, mod_time, get_link(uid, path, name)) for name, mod_time in files.items()]
   formatted_data = util.get_formatted_file_list(data)
 
-  return render_template('main.html', messages=formatted_data)
+  return render_template('main.html',
+                         messages=formatted_data,
+                         uid=uid,
+                         num_files=len(file_list),
+                         stats=get_stats(uid))
 
 def sign_in():
   return render_template('sign_in.html')

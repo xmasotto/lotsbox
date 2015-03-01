@@ -7,7 +7,7 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
   <!--  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css"> -->
-  <link href="http://getbootstrap.com/examples/dashboard/dashboard.css" rel="stylesheet"> 
+  <link href="http://getbootstrap.com/examples/dashboard/dashboard.css" rel="stylesheet">
 
     <style>
       body {
@@ -32,7 +32,7 @@
       #formSearch {
         padding-top: 8%;
       }
-      
+
       #chart-display {
 		  margin-left: 400px
 	  }
@@ -55,30 +55,28 @@
       <div class="row">
         <div id="divSidebar" class="col-sm-2 col-md-1 col-md-offset-2">
           <div class="sidebar-module">
+			Welcome, <b>{{ uid }}</b>
+			<hr>
+		  </div>
+          <span class="sidebar-module">
             <ol class="list-unstyled">
-				
-              <li><form action="http://google.com">
-					<button class="btn btn-default" type="submit" height=100><img src="../static/images/cabinet.png" width=70 height=70></button>
-				</form></li>
-              <li><form action="http://google.com">
-					<button class="btn btn-default" type="submit" height=100><img src="../static/images/pie-sample.png" width=70 height=70></button>
-				</form></li>
+              <li><a href="/?uid={{uid}}">Files</a></li>
+              <li><a href="/analytics?uid={{uid}}">Analytics</a></li>
             </ol>
-          </div>
-          <div class="sidebar-module">
-            <h4>Also from Lotsbox</h4>
-            <ol class="list-unstyled">
-              <li><a href="#">Lol</a></li>
-              <li><a href="#">Also Lol</a></li>
-            </ol>
-          </div>
+			<hr>
+</span>
+
+<span class="sidebar-module">
+	  {{ num_files }} Files<br>
+	  {{ stats[0] }}MB /
+	  {{ stats[1] }}MB
+          </span>
         </div><!-- /.blog-sidebar -->
         <div id="chart-display">
 		<canvas id="myCanvas" width="400" height="400"></canvas>
 	</div>
       </div>
-    </div>
-	
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
   </body>
@@ -130,15 +128,7 @@
 
 		//Boolean - Whether we animate scaling the Doughnut from the centre
 		animateScale : false,
-
-		//String - A legend template
-		legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<segments.length; i++){%><li><span style=\"background-color:<%=segments[i].fillColor%>\"></span><%if(segments[i].label){%><%=segments[i].label%><%}%></li><%}%></ul>"
-
 	}
 
 	var pie = new Chart(context).Pie(data);
 </script>
-
-
-
-
