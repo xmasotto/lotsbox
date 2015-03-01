@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+import sys
 import os
 import shutil
 import time
@@ -50,7 +53,7 @@ def apply_changes(local_folder, changes):
 
         if op == 'update_old':
             # download a file from dropbox (update existing)
-            os.remove(old_file)
+            os.remove(local_file)
             download_file(MY_UID, filename, local_file)
 
         if op == 'add_old':
@@ -69,13 +72,24 @@ def apply_changes(local_folder, changes):
             mod_time = os.stat(local_file).st_mtime
             add_file(MY_UID, local_file, filename, size, mod_time)
 
-local_folder = "testfolder3"
-while True:
-    local_files = get_local_files(local_folder)
-    server_files = db.list_files(MY_UID)
+def main(argv):
+    if len(argv) != 3:
+        print("Usage: " + argv[0] + " uid sync_folder")
+        sys.exit(1)
 
-    changes = track_changes(local_files, server_files)
-    print(changes)
-    apply_changes(local_folder, changes)
+    global MY_UID
+    MY_UID = argv[1]
+    local_folder = argv[2]
 
-    time.sleep(1)
+    while True:
+        local_files = get_local_files(local_folder)
+        server_files = db.list_files(MY_UID)
+
+        changes = track_changes(local_files, server_files)
+        print(changes)
+        apply_changes(local_folder, changes)
+
+        time.sleep(1)
+
+if __name__ == "__main__":
+    main(sys.argv)
