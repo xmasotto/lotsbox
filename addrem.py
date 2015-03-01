@@ -5,41 +5,45 @@ from dropbox_account import *
 
 db = LotsBoxDB()
 
-#NEED TO DEAL WITH FILE TYPES
-def generate_types(fType):
-	types = [0, 1]
-		if fType in types:
-			types.append(2)
-		else:
-			types.append(fType)
-	return types
-	
-#NEED TO DEAL WITH FILE TYPES
-def get_type(path):
-	return 0
+def random_combination(iterable , r):
+    pool = tuple(iterable)
+    n = len(pool)
+    indices = sorted(random.sample(xrange(n), r))
+    return tuple(pool[i] for i in indices)
 
-#NEED TO GENERATE UNIQUE FID
-def generate_fid():
-	return str(random.randint(1, 1000)
-	
+def generate_fid(uid):
+    chars = [chr(ord('A') + x) for x in range(26))] + [str(x) for x in range(10)]
+    fid = random_combination(chars, 10)
+    while not db.is_unique_fid(fid):
+        fid = random_combination(chars, 10)
+    return fid
+
 
 def add_file(uid, path, mod_time):
-	fType = get_type(path)
-	size = os.path.getsize(path)
-	box = db.get_box(uid, fType, size)
-	if box == None:
-		types = generate_types(0)
-		account = generateAccount(types) #CHECK FOR EMAIL CONFLICTS
-		box = account.app_key, account.app_secret, account.app_token
-		db.add_box(uid, app_key, app_secret, app_token, types, 4**30) #NEED EXACT SPACE SIZE
-	f = read(path, "r")
-	client = dropbox.client.DropboxClient(box[2])
-	fid = generate_fid()
-	client.put_file(fid, f)
-	db.add_file(uid, path) #UPDATE BOX SIZE IN ADD_FILE
-	
+    #CHECK FILE SIZE > 2GB
+    size = os.path.getsize(path)
+    box = db.get_box(uid, size)
+    if box == None:
+        account = generateAccount() #CHECK FOR EMAIL CONFLICTS
+        box = account.app_key, account.app_secret, account.app_token
+        db.add_box(uid, app_key, app_secret, app_token, 4**30) #NEED EXACT SPACE SIZE   
+    fid = generate_fid()
+    f = read(path, "r")
+    client = dropbox.client.DropboxClient(box[2])
+    client.put_file(fid, f)
+    f.close()
+    db.add_file(uid, path) #UPDATE BOX SIZE IN ADD_FILE
+    
 def delete_file(uid, path):
-	fid, key, secret, token = find_file(uid, path)
-	client = dropbox.client.DropboxClient(token)
-	client.file_delete(fid)
-	
+    fid, key, secret, token = db.find_file(uid, path)
+    client = dropbox.client.DropboxClient(token)
+    client.file_delete(fid)
+    
+def download_file(fid):
+    fid, path, token = db.find_file(fid)
+    client = dropbox.client.DropboxClient(token)
+    
+    #SAVE FILE TO CORRECT NAME AND PLACE
+    f = open(fid, "w")
+    f.write(client.get_file(fid).read())
+    f.close()

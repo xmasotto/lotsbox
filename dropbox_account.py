@@ -6,6 +6,7 @@ import imaplib
 import time
 import bs4
 import json
+import random
 
 def monkeypatch_mechanize():
     """Work-around for a mechanize 0.2.5 bug. See: https://github.com/jjlee/mechanize/pull/58"""
@@ -29,25 +30,26 @@ def monkeypatch_mechanize():
 
         SubmitControl.__init__ = __init__
 
-def generateAccount(fileTypes = [0, 1, 2]):
-	email = "uiuclotsbox@gmail.com"
-	last = base_email.index("@")
+#DEAL WITH VERIFICATION
+def generateAccount():
+    email = "uiuclotsbox@gmail.com"
+    last = email.index("@")
     for l in range(5):
         i = random.randrange(0, last)
         j = random.randint(1, 5)
         email = email[:i] + "." * j + email[i:]
-	password = "Bagels13"
-	fname = "Varun"
-	lname = "Berry"
-	return DropboxAccount(email, password, fname, lname, fileTypes)
+    password = "Bagels13"
+    fname = "Varun"
+    lname = "Berry"
+    return DropboxAccount(email, password, fname, lname)
 
 class DropboxAccount:
-    def __init__(self, email, password, fname, lname, fileTypes = [0, 1, 2]):
+    def __init__(self, email, password, fname, lname):
         self.email = email
         self.password = password
         self.fname = fname
         self.lname = lname
-
+        
         cj = cookielib.LWPCookieJar()
 
         self.br = self.init_browser()
@@ -157,8 +159,8 @@ class DropboxAccount:
         self.br.form.set_value(["files"], name="data_type")
         self.br.form.set_value(["specific"], name="file_access")
         self.br.form.set_value(appname, name="name")
-        for type in self.fileTypes:
-            self.br.form.find_control("file_types").items[type].selected=True
+        for fType in range(3):
+            self.br.form.find_control("file_types").items[fType].selected=True
         self.br.form.find_control("tos_accept").items[0].selected=True
         self.br.submit()
 
