@@ -39,6 +39,11 @@ def main(path=None):
       return show_file(uid, path)
 
 
+@app.route('/analytics')
+def analytics():
+  return render_template("analytics.html")  
+
+
 def show_file(uid, path):
   pass
 
