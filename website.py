@@ -48,6 +48,8 @@ def show_file(uid, path):
   fid, mod_time, token = mydb.find_file(uid, path)
   client = dropbox.client.DropboxClient(token)
   mime = mimetypes.guess_type(path)[0]
+  mime = mime or "application/octet-stream"
+
   response = client.get_file(fid)
 
   def gen():
