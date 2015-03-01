@@ -7,6 +7,7 @@ import sys
 import dropbox
 import mimetypes
 import util
+import random
 
 app = Flask(__name__)
 
@@ -58,6 +59,29 @@ def main(path=""):
     else:
       return show_file(uid, path)
 
+def htmlcolor(r, g, b):
+    def _chkarg(a):
+        if isinstance(a, int): # clamp to range 0--255
+            if a < 0:
+                a = 0
+            elif a > 255:
+                a = 255
+        elif isinstance(a, float): # clamp to range 0.0--1.0 and convert to integer 0--255
+            if a < 0.0:
+                a = 0
+            elif a > 1.0:
+                a = 255
+            else:
+                a = int(round(a*255))
+        else:
+            raise ValueError('Arguments must be integers or floats.')
+        return a
+    r = _chkarg(r)
+    g = _chkarg(g)
+    b = _chkarg(b)
+    return '#{:02x}{:02x}{:02x}'.format(r,g,b)
+
+
 @app.route('/analytics')
 def analytics():
   uid = request.args.get('uid')
@@ -65,8 +89,15 @@ def analytics():
     return sign_in()
   else:
     file_list = mydb.list_files(uid)
+    box_info = [(box['email'], round(box['space'] / 1024 / 1024, 1))
+             for box in mydb.db.boxes.find({"uid": uid})]
+    boxes = []
+    for box in box_info:
+      boxes.append(("Box " + str(len(boxes)+1), round(start_space/1024/1024, 1) - box[1], htmlcolor(random.randint(0, 100), random.randint(100, 255), random.randint(100, 255))))
     return render_template("analytics.html",
                            uid=uid,
+                           boxes=boxes,
+                           num_boxes=len(box_info),
                            num_files=len(file_list),
                            stats=get_stats(uid))
 
