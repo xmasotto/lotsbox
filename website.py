@@ -42,7 +42,7 @@ def get_stats(uid):
   used = total - remaining
   if total == 0:
       total = 100 * 1024 * 1024
-  return round(used / 1024 / 1024), round(total / 1024 / 1024)
+  return round(used / 1024 / 1024, 1), round(total / 1024 / 1024, 1)
 
 def get_link(uid, path, name):
   return "/%s?uid=%s" % (path + name, uid)
@@ -108,12 +108,14 @@ def accounts():
     return sign_in()
   else:
     file_list = mydb.list_files(uid)
-    boxes = [(box['email'], round(box['space'] / 1024 / 1024, 1))
+    box_size = round(start_space/1024/1024, 1)
+    boxes = [(box['email'], box_size - round(box['space'] / 1024 / 1024, 1))
              for box in mydb.db.boxes.find({"uid": uid})]
     return render_template("accounts.html",
                            uid=uid,
                            num_files=len(file_list),
                            boxes=boxes,
+                           box_size=box_size,
                            stats=get_stats(uid))
 
 def show_file(uid, path):
@@ -171,4 +173,8 @@ def sign_in():
   return render_template('sign_in.html')
 
 if __name__ == '__main__':
-  app.run(debug=True, host='0.0.0.0')
+  port = 5000
+  if len(sys.argv) > 1:
+    port = int(sys.argv[1])
+
+  app.run(debug=True, host='0.0.0.0', port=port)

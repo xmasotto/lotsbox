@@ -79,14 +79,14 @@
               <thead>
                 <tr>
                   <th>Dropbox Account</th>
-                  <th>Space</th>
+                  <th>Usage</th>
                 </tr>
               </thead>
               <tbody>
                 {% for box in boxes %}
                   <tr>
                     <td>{{ box[0] }}</td>
-                    <td> {{ box[1] }}MB </td>
+                    <td> {{ box[1] }}MB / {{ box_size }}MB </td>
                   </tr>
                 {% endfor %}
               </tbody>
