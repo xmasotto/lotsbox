@@ -16,7 +16,7 @@ def get_formatted_file_list(raw_file_list):
     path = f[1]
     epoch = f[2]
 
-    date_time = datetime.datetime.fromtimestamp(epoch).strftime('%m/%d/%Y %I:%M:%S %p').lstrip('0')
+    date_time = datetime.datetime.fromtimestamp(epoch).strftime('%-m/%d/%Y %-I:%M:%S %p')
     kind = get_file_kind(path)
 
     new_file_list.append((f[0], path, kind, date_time, f[3]))
