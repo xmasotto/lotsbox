@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 from db import *
 
 import urllib2
 import sys
+import dropbox
+import mimetypes
 
 app = Flask(__name__)
 
@@ -41,9 +43,25 @@ def main(path=None):
     else:
       return show_file(uid, path)
 
-
 def show_file(uid, path):
-  pass
+  fid, mod_time, token = mydb.find_file(uid, path)
+  client = dropbox.client.DropboxClient(token)
+  mime = mimetypes.guess_type(path)[0]
+  response = client.get_file(fid)
+
+  def gen():
+    while True:
+      data = response.read(1000 * 1000)
+      if data:
+        yield data
+      else:
+        break
+
+  headers = {
+    'Content-length': response.getheader('content-length')
+  }
+
+  return Response(gen(), headers=headers, mimetype=mime)
 
 
 def show_folder(uid, path):

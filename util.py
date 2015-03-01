@@ -5,3 +5,6 @@ def random_characters(r):
     n = len(pool)
     indices = sorted(random.sample(xrange(n), r))
     return "".join(pool[i] for i in indices)
+
+def get_mime_type(ext):
+    pass

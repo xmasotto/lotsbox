@@ -90,7 +90,7 @@ def main(argv):
         print(changes)
         apply_changes(local_folder, changes)
 
-        time.sleep(1)
+        time.sleep(5)
 
 if __name__ == "__main__":
     main(sys.argv)
