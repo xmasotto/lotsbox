@@ -81,8 +81,8 @@ def main(argv):
 
     while True:
         local_files = get_local_files(local_folder)
-        server_files = db.list_files(MY_UID)
-        
+        server_files = mydb.list_files(MY_UID)
+
         #print("local files: %s" % local_files)
         #print("server files: %s" % server_files)
 

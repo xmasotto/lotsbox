@@ -1,8 +1,8 @@
 from pymongo import MongoClient
 
 class LotsBoxDB:
-    def __init__(self):
-        self.db = MongoClient('localhost', 27017).LotsBox
+    def __init__(self, host):
+        self.db = MongoClient(host, 27017).LotsBox
 
     def add_box(self, uid, key, token, space):
         box_record = {}
@@ -17,7 +17,7 @@ class LotsBoxDB:
         box = self.db.boxes.find_one({"key" : key})
         print "Adding space: " + str(box["space"]) + " -----> " + str(box["space"] + space)
         self.db.boxes.update({"key" : key}, {"$set": {"space" : space + box["space"]}})
-        
+
     def remove_space(self, key, space):
         box = self.db.boxes.find_one({"key" : key})
         print "Removing space: " + str(box["space"]) + " -----> " + str(box["space"] - space)
@@ -81,3 +81,5 @@ class LotsBoxDB:
         else:
             print "No box found :("
             return None
+
+mydb = LotsBoxDB("ec2-52-10-40-186.us-west-2.compute.amazonaws.com")
