@@ -2,6 +2,10 @@ import os
 import shutil
 import time
 
+from addrem import *
+
+MY_UID = 74
+
 def get_local_files(path):
     result = []
     for dirpath, dirname, filenames in os.walk(path):
@@ -40,44 +44,38 @@ def track_changes(old_files, new_files):
 
     return result
 
-def apply_changes(old_folder, new_folder, changes):
+def apply_changes(local_folder, changes):
     for op, filename in changes:
-        old_file = os.path.join(old_folder, filename)
-        new_file = os.path.join(new_folder, filename)
+        local_file = os.path.join(local_folder, filename)
 
         if op == 'update_old':
+            # download a file from dropbox (update existing)
             os.remove(old_file)
-            shutil.copyfile(new_file, old_file)
-            shutil.copystat(new_file, old_file)
+            download_file(MY_UID, filename, local_file)
 
         if op == 'add_old':
-            dirname = os.path.dirname(old_file)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-            shutil.copyfile(new_file, old_file)
-            shutil.copystat(new_file, old_file)
+            # download a file from dropbox (add new)
+            download_file(MY_UID, filename, local_file)
 
         if op == 'update_new':
-            os.remove(new_file)
-            shutil.copyfile(old_file, new_file)
-            shutil.copystat(old_file, new_file)
+            # upload a file to dropbox (update existing)
+            size = os.path.getsize(local_file)
+            mod_time = os.stat(local_file).st_mtime
+            delete_file(MY_UID, filename)
+            add_file(MY_UID, local_file, filename, size, mod_time)
 
         if op == 'add_new':
-            dirname = os.path.dirname(new_file)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-            shutil.copyfile(old_file, new_file)
-            shutil.copystat(old_file, new_file)
+            size = os.path.getsize(local_file)
+            mod_time = os.stat(local_file).st_mtime
+            add_file(MY_UID, local_file, filename, size, mod_time)
 
-old_folder = "testfolder"
-new_folder = "testfolder2"
-
+local_folder = "testfolder3"
 while True:
-    old_files = get_local_files(old_folder)
-    new_files = get_local_files(new_folder)
+    local_files = get_local_files(local_folder)
+    server_files = db.list_files(MY_UID)
 
-    changes = track_changes(old_files, new_files)
+    changes = track_changes(local_files, server_files)
     print(changes)
-    apply_changes(old_folder, new_folder, changes)
+    apply_changes(local_folder, changes)
 
     time.sleep(1)

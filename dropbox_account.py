@@ -7,6 +7,7 @@ import time
 import bs4
 import json
 import random
+import util
 
 def monkeypatch_mechanize():
     """Work-around for a mechanize 0.2.5 bug. See: https://github.com/jjlee/mechanize/pull/58"""
@@ -31,17 +32,23 @@ def monkeypatch_mechanize():
         SubmitControl.__init__ = __init__
 
 #DEAL WITH VERIFICATION
-def generateAccount():
-    email = "uiuclotsbox@gmail.com"
-    last = email.index("@")
-    for l in range(5):
-        i = random.randrange(0, last)
-        j = random.randint(1, 5)
-        email = email[:i] + "." * j + email[i:]
-    password = "Bagels13"
-    fname = "Varun"
-    lname = "Berry"
-    return DropboxAccount(email, password, fname, lname)
+def generateAccount(k=254):
+    base_email = "uiuclotsbox@gmail.com"
+    try:
+        email = base_email
+        for j in range(k - len(base_email)):
+            last = email.index("@")
+            i = random.randrange(0, last)
+            email = email[:i] + "." + email[i:]
+
+        password = "Bagels13"
+        fname = "Varun"
+        lname = "Berry"
+        return DropboxAccount(email, password, fname, lname)
+    except Exception:
+        raise
+        # print("email \"%s\" already in use" % email)
+        # return generateAccount(k)
 
 class DropboxAccount:
     def __init__(self, email, password, fname, lname):
@@ -49,7 +56,7 @@ class DropboxAccount:
         self.password = password
         self.fname = fname
         self.lname = lname
-        
+
         cj = cookielib.LWPCookieJar()
 
         self.br = self.init_browser()
@@ -174,9 +181,8 @@ class DropboxAccount:
         return app_key, app_secret
 
     def fetch_auth_info(self):
-        appname = self.email + "_project"
+        appname = "lotsbox_" + util.random_characters(30)
         self.app_key, self.app_secret = self.create_app(appname)
-
         # get the oauth token
         soup = bs4.BeautifulSoup(self.br.response().read())
         app_id = soup.find_all("input", type="hidden")[2]['value']
