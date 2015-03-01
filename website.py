@@ -26,6 +26,9 @@ def get_icon(name):
     else:
       return "http://icons.iconarchive.com/icons/danrabbit/elementary/32/Document-empty-icon.png"
 
+def get_link(uid, path, name):
+  return "/?uid=%s&p=%s" % (uid, path + name)
+
 @app.route('/')
 def main(path=None):
   uid = request.args.get('uid')
@@ -62,7 +65,7 @@ def show_folder(uid, path):
     else:
       files[filename] = mod_date
 
-  data = [(get_icon(name), name, mod_time) for name, mod_time in files.items()]
+  data = [(get_icon(name), name, mod_time, get_link(uid, path, name)) for name, mod_time in files.items()]
   return render_template('main.html', messages=data)
 
 def sign_in():
