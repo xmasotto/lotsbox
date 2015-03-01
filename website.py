@@ -5,6 +5,7 @@ import urllib2
 import sys
 import dropbox
 import mimetypes
+import util
 
 app = Flask(__name__)
 
@@ -84,7 +85,9 @@ def show_folder(uid, path):
       files[filename] = mod_date
 
   data = [(get_icon(name), name, mod_time, get_link(uid, path, name)) for name, mod_time in files.items()]
-  return render_template('main.html', messages=data)
+  formatted_data = util.get_formatted_file_list(data)
+
+  return render_template('main.html', messages=formatted_data)
 
 def sign_in():
   return render_template('sign_in.html')
