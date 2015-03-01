@@ -7,8 +7,6 @@ import time
 
 from addrem import *
 
-MY_UID = 74
-
 def get_local_files(path):
     result = []
     for dirpath, dirname, filenames in os.walk(path):
@@ -28,7 +26,7 @@ def track_changes(old_files, new_files):
     for name, mtime in old_files:
         for name2, mtime2 in new_files:
             if name == name2:
-                if mtime > mtime2:
+                if mtime - mtime2 >= 0.01:
                     result.append(('update_new', name))
                 break
         else:
@@ -39,7 +37,7 @@ def track_changes(old_files, new_files):
     for name, mtime in new_files:
         for name2, mtime2 in old_files:
             if name == name2:
-                if mtime > mtime2:
+                if mtime - mtime2 >= 0.01:
                     result.append(('update_old', name))
                 break
         else:
@@ -84,6 +82,9 @@ def main(argv):
     while True:
         local_files = get_local_files(local_folder)
         server_files = db.list_files(MY_UID)
+        
+        #print("local files: %s" % local_files)
+        #print("server files: %s" % server_files)
 
         changes = track_changes(local_files, server_files)
         print(changes)

@@ -5,6 +5,9 @@ from db import *
 from dropbox_account import *
 
 db = LotsBoxDB()
+size_buffer = (2**10) * 500
+#start_space = 2**30
+start_space = (2**20)*100
 
 def generate_fid(uid):
     fid = util.random_characters(10)
@@ -13,18 +16,18 @@ def generate_fid(uid):
     return fid
 
 def add_file(uid, input_file, path, size, mod_time):
-    #CHECK FILE SIZE > 2GB
-    box = db.get_box(uid, size)
+    #CHECK FILE SIZE > 150MB
+    box = db.get_box(uid, size + size_buffer)
     if box == None:
         account = generateAccount()
         box = account.app_key, account.app_token
-        db.add_box(uid, account.app_key, account.app_token, 4**30)
+        db.add_box(uid, account.app_key, account.app_token, start_space)
     fid = generate_fid(uid)
 
     client = dropbox.client.DropboxClient(box[1])
     print("put in " + fid)
     client.put_file(fid, open(input_file, "r"))
-    db.add_file(uid, path, fid, box[0], size, mod_time) #UPDATE BOX SIZE IN ADD_FILE
+    db.add_file(uid, path, fid, box[0], size, mod_time)
     print("added file: %s" % path)
 
 def delete_file(uid, path):
