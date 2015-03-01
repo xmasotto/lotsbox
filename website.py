@@ -1,8 +1,11 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 from db import *
 
 import urllib2
 import sys
+import dropbox
+import mimetypes
+import util
 
 app = Flask(__name__)
 
@@ -26,26 +29,46 @@ def get_icon(name):
     else:
       return "http://icons.iconarchive.com/icons/danrabbit/elementary/32/Document-empty-icon.png"
 
+def get_link(uid, path, name):
+  return "/%s?uid=%s" % (path + name, uid)
+
 @app.route('/')
-def main(path=None):
+@app.route('/<path:path>')
+def main(path=""):
   uid = request.args.get('uid')
   if uid == None:
     return sign_in()
   else:
-    path = request.args.get('p') or ""
     if path == "" or path[-1] == '/':
       return show_folder(uid, path)
     else:
       return show_file(uid, path)
 
-
 @app.route('/analytics')
 def analytics():
   return render_template("analytics.html")  
 
-
 def show_file(uid, path):
-  pass
+  fid, mod_time, token = mydb.find_file(uid, path)
+  client = dropbox.client.DropboxClient(token)
+  mime = mimetypes.guess_type(path)[0]
+  mime = mime or "application/octet-stream"
+
+  response = client.get_file(fid)
+
+  def gen():
+    while True:
+      data = response.read(1000 * 1000)
+      if data:
+        yield data
+      else:
+        break
+
+  headers = {
+    'Content-length': response.getheader('content-length')
+  }
+
+  return Response(gen(), headers=headers, mimetype=mime)
 
 
 def show_folder(uid, path):
@@ -67,8 +90,10 @@ def show_folder(uid, path):
     else:
       files[filename] = mod_date
 
-  data = [(get_icon(name), name, mod_time) for name, mod_time in files.items()]
-  return render_template('main.html', messages=data)
+  data = [(get_icon(name), name, mod_time, get_link(uid, path, name)) for name, mod_time in files.items()]
+  formatted_data = util.get_formatted_file_list(data)
+
+  return render_template('main.html', messages=formatted_data)
 
 def sign_in():
   return render_template('sign_in.html')
